@@ -1,14 +1,13 @@
 package org.linagora.event.sourcing.workflow;
 
 import java.util.Date;
-import java.util.UUID;
 
 public class TaskUnassigned implements TaskEvent {
 
-	private final UUID taskId;
+	private final int taskId;
 	private final Date eventDate;
 
-	public TaskUnassigned(UUID taskId) {
+	public TaskUnassigned(int taskId) {
 		this.taskId = taskId;
 		this.eventDate = new Date();
 	}
@@ -18,7 +17,7 @@ public class TaskUnassigned implements TaskEvent {
 	}
 
 	@Override
-	public UUID taskId() {
+	public int taskId() {
 		return taskId;
 	}
 

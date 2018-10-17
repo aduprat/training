@@ -2,21 +2,20 @@ package org.linagora.event.sourcing.workflow;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import com.google.common.collect.Lists;
 
 public class Task {
 
-	private final UUID id;
+	private final int id;
 	private String name;
 	private Optional<User> assignee;
 
-	public Task(UUID id, String name) {
+	public Task(int id, String name) {
 		this(id, name, Lists.newArrayList());
 	}
 
-	public Task(UUID id, String name, List<TaskEvent> events) {
+	public Task(int id, String name, List<TaskEvent> events) {
 		this.id = id;
 		this.name = name;
 		this.assignee = Optional.empty();
@@ -24,7 +23,7 @@ public class Task {
 			.forEach(this::apply);
 	}
 
-	public UUID getId() {
+	public int getId() {
 		return id;
 	}
 	

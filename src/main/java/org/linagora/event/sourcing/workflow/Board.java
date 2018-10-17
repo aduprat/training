@@ -8,6 +8,8 @@ public class Board {
 	private final UUID id;
 	private String name;
 	
+	private int sequence = 0;
+	
 	public Board(String name) {
 		this.id = UUID.randomUUID();
 		this.name = name;
@@ -22,7 +24,7 @@ public class Board {
 	}
 
 	public Optional<TaskCreated> createTask(CreateCommand command) {
-		TaskCreated event = new TaskCreated(new Task(UUID.randomUUID(), command.getName()));
+		TaskCreated event = new TaskCreated(new Task(sequence++, command.getName()));
 		apply(event);
 		return Optional.of(event);
 	}
