@@ -9,25 +9,26 @@ import org.linagora.event.sourcing.workflow.Event;
 import org.linagora.event.sourcing.workflow.Task;
 import org.linagora.event.sourcing.workflow.TaskAssigned;
 import org.linagora.event.sourcing.workflow.TaskCreated;
+import org.linagora.event.sourcing.workflow.TaskEvent;
 import org.linagora.event.sourcing.workflow.TaskUnassigned;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Maps;
 
-
 public class HotPotatoe implements Projection {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HotPotatoe.class);
-	
+
 	private Map<Integer, TaskVO> tasks;
-	private Map<Class<Event>, Integer> lastSequences; 
-	
+	private Map<Class<? extends TaskEvent>, Integer> lastSequences;
+
 	public HotPotatoe() {
 		tasks = Maps.newHashMap();
 		lastSequences = Maps.newHashMap();
 	}
-	
+
+	@Override
 	public void apply(Event event) {
 		LOGGER.debug("Receive event {}", event);
 		if (event instanceof TaskCreated) {
@@ -43,10 +44,11 @@ public class HotPotatoe implements Projection {
 				}
 				task.setNumberOfMovements(task.getNumberOfMovements() + 1);
 				task.setCurrentAssignee(((TaskAssigned) event).getUser().getName());
+				lastSequences.put(TaskAssigned.class, taskId);
 			}
 		} else if (event instanceof TaskUnassigned) {
 			int taskId = ((TaskUnassigned) event).taskId();
-			if (notProcessed(taskId, TaskAssigned.class)) {
+			if (notProcessed(taskId, TaskUnassigned.class)) {
 				TaskVO task = tasks.get(taskId);
 				if (task == null) {
 					task = new TaskVO(taskId, null, 0, null);
@@ -54,22 +56,25 @@ public class HotPotatoe implements Projection {
 				}
 				task.setNumberOfMovements(task.getNumberOfMovements() + 1);
 				task.setCurrentAssignee(null);
+				lastSequences.put(TaskUnassigned.class, taskId);
 			}
 		}
 	}
-	
-	private boolean notProcessed(int taskId, Class<TaskAssigned> clazz) {
-		if (lastSequences.get(clazz) < taskId) {
+
+	private boolean notProcessed(int taskId, Class<? extends TaskEvent> clazz) {
+		LOGGER.debug("taskId {} clazz {}", taskId, clazz);
+		Integer lastSequence = lastSequences.get(clazz);
+		if (lastSequence == null || lastSequence < taskId) {
+			LOGGER.debug("true");
 			return true;
 		}
+		LOGGER.debug("false");
 		return false;
 	}
 
 	public List<TaskVO> getTasks() {
 		LOGGER.debug("Number of tasks {}", tasks.size());
-		return tasks.values()
-				.stream()
-				.sorted(Comparator.comparing(TaskVO::getNumberOfMovements).reversed())
+		return tasks.values().stream().sorted(Comparator.comparing(TaskVO::getNumberOfMovements).reversed())
 				.collect(Collectors.toList());
 	}
 }
