@@ -1,23 +1,27 @@
 package org.linagora.event.sourcing.workflow;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.google.common.collect.Lists;
+
 public class Task {
 
-	private List<Event> events;
 	private final UUID id;
 	private String name;
 	private Optional<User> assignee;
 
 	public Task(String name) {
-		this.events = new ArrayList<>();
+		this(name, Lists.newArrayList());
+	}
+
+	public Task(String name, List<Event> events) {
 		this.id = UUID.randomUUID();
 		this.name = name;
 		this.assignee = Optional.empty();
-//		computeProjection();
+		events.stream()
+			.forEach(this::apply);
 	}
 
 	public UUID getId() {
@@ -36,7 +40,6 @@ public class Task {
 	}
 
 	private void apply(Event event) {
-		events.add(event);
 		if (event instanceof TaskAssigned) {
 			this.assignee = Optional.of(((TaskAssigned) event).getUser());
 		} else if (event instanceof TaskUnassigned) {
@@ -51,5 +54,9 @@ public class Task {
 		TaskUnassigned event = new TaskUnassigned(id);
 		apply(event);
 		return Optional.of(event);
+	}
+
+	public Optional<User> getAssignee() {
+		return assignee;
 	}
 }

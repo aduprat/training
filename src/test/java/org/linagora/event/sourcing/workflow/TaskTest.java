@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
+
 public class TaskTest {
 
 	static final User USER = new User("name", UUID.randomUUID());
@@ -75,6 +77,24 @@ public class TaskTest {
 		testee.assign(COMMAND);
 		Optional<TaskUnassigned> event = testee.unassign(new UnassignCommand());
 		assertThat(event).isNotEmpty();
+	}
+
+	@Test
+	public void projectionShouldBeInitializedWhenInputEventIsGiven() {
+		UUID taskId = UUID.randomUUID();
+		Task testee = new Task("taskName",
+				Lists.newArrayList(new TaskAssigned(taskId, USER)));
+		
+		assertThat(testee.getAssignee()).isNotEmpty();
+	}
+
+	@Test
+	public void projectionShouldBeInitializedWhenInputEventsAreGiven() {
+		UUID taskId = UUID.randomUUID();
+		Task testee = new Task("taskName",
+				Lists.newArrayList(new TaskAssigned(taskId, USER), new TaskUnassigned(taskId)));
+		
+		assertThat(testee.getAssignee()).isEmpty();
 	}
 
 }
