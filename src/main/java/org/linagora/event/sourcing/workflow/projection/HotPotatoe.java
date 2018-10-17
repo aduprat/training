@@ -3,6 +3,7 @@ package org.linagora.event.sourcing.workflow.projection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.linagora.event.sourcing.workflow.Event;
@@ -61,11 +62,9 @@ public class HotPotatoe implements Projection {
 	}
 
 	private boolean notProcessed(int taskId, Class<? extends TaskEvent> clazz) {
-		Integer lastSequence = lastSequences.get(clazz);
-		if (lastSequence == null || lastSequence < taskId) {
-			return true;
-		}
-		return false;
+		return Optional.ofNullable(lastSequences.get(clazz))
+			.map(value -> value < taskId)
+			.orElse(true);
 	}
 
 	public List<TaskVO> getTasks() {
