@@ -22,11 +22,11 @@ public class Board {
 	}
 
 	public Optional<TaskCreated> createTask(CreateCommand command) {
-		TaskCreated event = new TaskCreated(id, command.getName());
+		TaskCreated event = new TaskCreated(new Task(UUID.randomUUID(), command.getName()));
 		apply(event);
 		return Optional.of(event);
 	}
 
-	private void apply(TaskEvent event) {
+	private void apply(Event event) {
 	}
 }

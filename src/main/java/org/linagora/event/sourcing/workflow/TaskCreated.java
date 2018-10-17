@@ -1,27 +1,19 @@
 package org.linagora.event.sourcing.workflow;
 
 import java.util.Date;
-import java.util.UUID;
 
-public class TaskCreated implements TaskEvent {
+public class TaskCreated implements Event {
 
-	private final UUID taskId;
-	private final String name;
+	private final Task task;
 	private final Date eventDate;
 
-	public TaskCreated(UUID taskId, String name) {
-		this.taskId = taskId;
-		this.name = name;
+	public TaskCreated(Task task) {
+		this.task = task;
 		this.eventDate = new Date();
 	}
 
-	@Override
-	public UUID taskId() {
-		return taskId;
-	}
-
-	public String getName() {
-		return name;
+	public Task task() {
+		return task;
 	}
 
 	public Date getEventDate() {
@@ -30,6 +22,6 @@ public class TaskCreated implements TaskEvent {
 
 	@Override
 	public String toString() {
-		return "TaskCreated [name=" + name + ", eventDate=" + eventDate + "]";
+		return "TaskCreated [task=" + task + ", eventDate=" + eventDate + "]";
 	}
 }

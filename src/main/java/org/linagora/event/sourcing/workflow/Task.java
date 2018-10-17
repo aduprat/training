@@ -12,12 +12,12 @@ public class Task {
 	private String name;
 	private Optional<User> assignee;
 
-	public Task(String name) {
-		this(name, Lists.newArrayList());
+	public Task(UUID id, String name) {
+		this(id, name, Lists.newArrayList());
 	}
 
-	public Task(String name, List<TaskEvent> events) {
-		this.id = UUID.randomUUID();
+	public Task(UUID id, String name, List<TaskEvent> events) {
+		this.id = id;
 		this.name = name;
 		this.assignee = Optional.empty();
 		events.stream()
@@ -26,6 +26,10 @@ public class Task {
 
 	public UUID getId() {
 		return id;
+	}
+	
+	public String getName() {
+		return name;
 	}
 
 	public Optional<TaskAssigned> assign(AssignCommand command) {
@@ -45,7 +49,7 @@ public class Task {
 		} else if (event instanceof TaskUnassigned) {
 			this.assignee = Optional.empty();
 		} else if (event instanceof TaskCreated) {
-			name = ((TaskCreated) event).getName();
+			name = ((TaskCreated) event).task().getName();
 		}
 	}
 
