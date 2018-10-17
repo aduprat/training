@@ -44,6 +44,8 @@ public class Task {
 			this.assignee = Optional.of(((TaskAssigned) event).getUser());
 		} else if (event instanceof TaskUnassigned) {
 			this.assignee = Optional.empty();
+		} else if (event instanceof TaskCreated) {
+			name = ((TaskCreated) event).getName();
 		}
 	}
 
