@@ -12,9 +12,7 @@ import org.linagora.event.sourcing.workflow.projection.TaskVO;
 public class EventSystem {
 
 	private Board board;
-
 	private HotPotatoe hotPotatoe;
-
 	private PubSub pubsub;
 
 	public EventSystem() {

@@ -35,40 +35,36 @@ public class HotPotatoe implements Projection {
 			Task task = ((TaskCreated) event).task();
 			tasks.put(task.getId(), new TaskVO(task.getId(), task.getName(), 0, null));
 		} else if (event instanceof TaskAssigned) {
-			int taskId = ((TaskAssigned) event).taskId();
-			if (notProcessed(taskId, TaskAssigned.class)) {
-				TaskVO task = tasks.get(taskId);
-				if (task == null) {
-					task = new TaskVO(taskId, null, 0, null);
-					tasks.put(taskId, task);
-				}
-				task.setNumberOfMovements(task.getNumberOfMovements() + 1);
-				task.setCurrentAssignee(((TaskAssigned) event).getUser().getName());
-				lastSequences.put(TaskAssigned.class, taskId);
-			}
+			updateLastSequence((TaskAssigned) event, TaskAssigned.class, ((TaskAssigned) event).getUser().getName());
 		} else if (event instanceof TaskUnassigned) {
-			int taskId = ((TaskUnassigned) event).taskId();
-			if (notProcessed(taskId, TaskUnassigned.class)) {
-				TaskVO task = tasks.get(taskId);
-				if (task == null) {
-					task = new TaskVO(taskId, null, 0, null);
-					tasks.put(taskId, task);
-				}
-				task.setNumberOfMovements(task.getNumberOfMovements() + 1);
-				task.setCurrentAssignee(null);
-				lastSequences.put(TaskUnassigned.class, taskId);
-			}
+			updateLastSequence((TaskUnassigned) event, TaskUnassigned.class, null);
 		}
 	}
 
+	private void updateLastSequence(TaskEvent task, Class<? extends TaskEvent> clazz, String assignee) {
+		int taskId = task.taskId();
+		if (notProcessed(taskId, clazz)) {
+			TaskVO taskVO = retrieveTaskVOOrCreate(taskId);
+			taskVO.setNumberOfMovements(taskVO.getNumberOfMovements() + 1);
+			taskVO.setCurrentAssignee(assignee);
+			lastSequences.put(clazz, taskId);
+		}
+	}
+
+	private TaskVO retrieveTaskVOOrCreate(int taskId) {
+		TaskVO task = tasks.get(taskId);
+		if (task == null) {
+			task = new TaskVO(taskId, null, 0, null);
+			tasks.put(taskId, task);
+		}
+		return task;
+	}
+
 	private boolean notProcessed(int taskId, Class<? extends TaskEvent> clazz) {
-		LOGGER.debug("taskId {} clazz {}", taskId, clazz);
 		Integer lastSequence = lastSequences.get(clazz);
 		if (lastSequence == null || lastSequence < taskId) {
-			LOGGER.debug("true");
 			return true;
 		}
-		LOGGER.debug("false");
 		return false;
 	}
 
