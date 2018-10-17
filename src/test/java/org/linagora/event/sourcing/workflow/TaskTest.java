@@ -11,7 +11,7 @@ public class TaskTest {
 
 	static final User USER = new User("name", UUID.randomUUID());
 	static final TaskDescription TASK = new TaskDescription("taskName");
-	static final AssignCommand COMMAND = new AssignCommand(USER, TASK);
+	static final AssignCommand COMMAND = new AssignCommand(USER);
 
 	@Test
 	public void assignShouldReturnATaskAssignedToCommandsUser() {
@@ -25,7 +25,7 @@ public class TaskTest {
 	public void assignShouldReturnAnEventOnGivenTask() {
 		Task testee = new Task("taskName");
 		Optional<TaskAssigned> event = testee.assign(COMMAND);
-		assertThat(event.get().getTask()).isEqualTo(TASK);
+		assertThat(event.get().taskId()).isEqualTo(testee.getId());
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class TaskTest {
 		testee.assign(COMMAND);
 		
 		User user2 = new User("name2", UUID.randomUUID());
-		AssignCommand command2 = new AssignCommand(user2, TASK);
+		AssignCommand command2 = new AssignCommand(user2);
 		Optional<TaskAssigned> event = testee.assign(command2);
 		assertThat(event.get().getUser()).isEqualTo(user2);
 	}

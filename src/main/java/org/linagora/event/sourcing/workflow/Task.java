@@ -28,7 +28,7 @@ public class Task {
 				return Optional.empty();
 			}
 		}
-		TaskAssigned assignEvent = new TaskAssigned(command.getUser(), command.getTask());
+		TaskAssigned assignEvent = new TaskAssigned(id, command.getUser());
 		events.add(assignEvent);
 		computeProjection();
 		return Optional.of(assignEvent);		
