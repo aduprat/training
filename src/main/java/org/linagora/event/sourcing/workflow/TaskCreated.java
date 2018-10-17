@@ -3,7 +3,7 @@ package org.linagora.event.sourcing.workflow;
 import java.util.Date;
 import java.util.UUID;
 
-public class TaskCreated implements Event {
+public class TaskCreated implements TaskEvent {
 
 	private final UUID taskId;
 	private final String name;

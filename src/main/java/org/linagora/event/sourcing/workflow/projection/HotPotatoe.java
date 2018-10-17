@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.linagora.event.sourcing.workflow.Event;
+import org.linagora.event.sourcing.workflow.TaskEvent;
 import org.linagora.event.sourcing.workflow.TaskAssigned;
 import org.linagora.event.sourcing.workflow.TaskCreated;
 import org.linagora.event.sourcing.workflow.TaskUnassigned;
@@ -22,7 +22,7 @@ public class HotPotatoe implements Projection {
 		tasks = Maps.newHashMap();
 	}
 	
-	public void apply(Event event) {
+	public void apply(TaskEvent event) {
 		if (event instanceof TaskCreated) {
 			tasks.put(event.taskId(), new TaskVO(event.taskId(), ((TaskCreated) event).getName(), 0, null));
 		} else if (event instanceof TaskAssigned) {

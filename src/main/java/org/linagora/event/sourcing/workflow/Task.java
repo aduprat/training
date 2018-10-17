@@ -16,7 +16,7 @@ public class Task {
 		this(name, Lists.newArrayList());
 	}
 
-	public Task(String name, List<Event> events) {
+	public Task(String name, List<TaskEvent> events) {
 		this.id = UUID.randomUUID();
 		this.name = name;
 		this.assignee = Optional.empty();
@@ -39,7 +39,7 @@ public class Task {
 		return Optional.of(event);
 	}
 
-	private void apply(Event event) {
+	private void apply(TaskEvent event) {
 		if (event instanceof TaskAssigned) {
 			this.assignee = Optional.of(((TaskAssigned) event).getUser());
 		} else if (event instanceof TaskUnassigned) {

@@ -27,6 +27,6 @@ public class Board {
 		return Optional.of(event);
 	}
 
-	private void apply(Event event) {
+	private void apply(TaskEvent event) {
 	}
 }
