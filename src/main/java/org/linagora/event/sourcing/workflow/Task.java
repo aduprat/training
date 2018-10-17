@@ -22,10 +22,6 @@ public class Task {
 		return id;
 	}
 
-	public TaskDescription getTaskDescription() {
-		return taskDescription;
-	}
-
 	public Optional<TaskAssigned> assign(AssignCommand command) {
 		if (lastEvent.isPresent()) {
 			if (lastEvent.get().getUser().equals(command.getUser())) {
