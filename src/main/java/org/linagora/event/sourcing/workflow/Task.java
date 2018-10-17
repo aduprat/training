@@ -8,7 +8,6 @@ import java.util.UUID;
 public class Task {
 
 	private List<Event> events;
-	private Optional<TaskAssigned> lastEvent;
 	private final UUID id;
 	private String name;
 	private Optional<User> assignee;
@@ -31,9 +30,9 @@ public class Task {
 				return Optional.empty();
 			}
 		}
-		TaskAssigned assignEvent = new TaskAssigned(id, command.getUser());
-		apply(assignEvent);
-		return Optional.of(assignEvent);
+		TaskAssigned event = new TaskAssigned(id, command.getUser());
+		apply(event);
+		return Optional.of(event);
 	}
 
 	private void apply(Event event) {
@@ -45,6 +44,12 @@ public class Task {
 		}
 	}
 
-//	public Optional<TaskUnassigned> unassign(UnassignCommand command) {
-//	}
+	public Optional<TaskUnassigned> unassign(UnassignCommand command) {
+		if (!this.assignee.isPresent()) {
+			return Optional.empty();
+		}
+		TaskUnassigned event = new TaskUnassigned(id);
+		apply(event);
+		return Optional.of(event);
+	}
 }

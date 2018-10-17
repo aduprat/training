@@ -42,6 +42,7 @@ public class TaskTest {
 		Optional<TaskAssigned> event = testee.assign(COMMAND);
 		assertThat(event).isEmpty();
 	}
+
 	@Test
 	public void assignShouldReturnEmptyWhenUserAlreadyAssigned() {
 		Task testee = new Task("taskName");
@@ -54,10 +55,26 @@ public class TaskTest {
 	public void assignShouldReturnEventWhenUserIsNotLastAssignee() {
 		Task testee = new Task("taskName");
 		testee.assign(COMMAND);
-		
+
 		User user2 = new User("name2", UUID.randomUUID());
 		AssignCommand command2 = new AssignCommand(user2);
 		Optional<TaskAssigned> event = testee.assign(command2);
 		assertThat(event.get().getUser()).isEqualTo(user2);
 	}
+
+	@Test
+	public void unassignShouldReturnEmptyWhenNoUserAssigned() {
+		Task testee = new Task("taskName");
+		Optional<TaskUnassigned> event = testee.unassign(new UnassignCommand());
+		assertThat(event).isEmpty();
+	}
+
+	@Test
+	public void unassignShouldReturnEventWhenUserAssigned() {
+		Task testee = new Task("taskName");
+		testee.assign(COMMAND);
+		Optional<TaskUnassigned> event = testee.unassign(new UnassignCommand());
+		assertThat(event).isNotEmpty();
+	}
+
 }
