@@ -3,7 +3,9 @@ package org.linagora.event.sourcing.workflow;
 import java.util.Optional;
 import java.util.UUID;
 
-public class Board {
+import org.linagora.event.sourcing.Aggregate;
+
+public class Board implements Aggregate {
 
 	private final UUID id;
 	private String name;

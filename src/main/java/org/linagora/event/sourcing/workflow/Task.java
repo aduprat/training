@@ -3,9 +3,11 @@ package org.linagora.event.sourcing.workflow;
 import java.util.List;
 import java.util.Optional;
 
+import org.linagora.event.sourcing.Aggregate;
+
 import com.google.common.collect.Lists;
 
-public class Task {
+public class Task implements Aggregate {
 
 	private final int id;
 	private String name;
