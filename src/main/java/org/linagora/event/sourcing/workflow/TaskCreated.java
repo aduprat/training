@@ -22,6 +22,6 @@ public class TaskCreated implements Event {
 
 	@Override
 	public String toString() {
-		return "TaskCreated [task=" + task + ", eventDate=" + eventDate + "]";
+		return "TaskCreated [" + task + ", eventDate=" + eventDate + "]";
 	}
 }

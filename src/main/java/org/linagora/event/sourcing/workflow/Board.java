@@ -4,6 +4,8 @@ import java.util.Optional;
 
 import org.linagora.event.sourcing.Aggregate;
 import org.linagora.event.sourcing.AggregateId;
+import org.linagora.event.sourcing.TaskStorage;
+import org.linagora.event.sourcing.workflow.Task.Factory;
 
 public class Board implements Aggregate {
 
@@ -25,7 +27,9 @@ public class Board implements Aggregate {
 	}
 
 	public Optional<TaskCreated> createTask(CreateCommand command) {
-		TaskCreated event = new TaskCreated(new Task(command.getName()));
+		// FIXME
+		Factory factory = new Task.Factory(new TaskStorage());
+		TaskCreated event = new TaskCreated(factory.create(command.getName()));
 		apply(event);
 		return Optional.of(event);
 	}

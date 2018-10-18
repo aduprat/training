@@ -5,53 +5,68 @@ import java.util.Optional;
 
 import org.linagora.event.sourcing.Aggregate;
 import org.linagora.event.sourcing.AggregateId;
-
-import com.google.common.collect.Lists;
+import org.linagora.event.sourcing.TaskStorage;
 
 public class Task implements Aggregate {
 
-	public static Task withEvents(AggregateId id, List<TaskEvent> events) {
-		Task task = new Task(id);
-		task.processEvents(events);
-		return task;
+	public static class Factory {
+
+		private final TaskStorage storage;
+
+		public Factory(TaskStorage storage) {
+			this.storage = storage;
+		}
+
+		public Task load(AggregateId id) {
+			return new Task(storage, id, storage.retrieve(id));
+		}
+
+		public Task load(AggregateId id, List<TaskEvent> events) {
+			return new Task(storage, id, events);
+		}
+
+		public Task create(String name) {
+			// FIXME : TaskCreated event ?
+			return new Task(storage, name);
+		}
 	}
-	
+
 	private final AggregateId id;
 	private int sequence;
 	private String name;
 	private Optional<User> assignee;
+	private TaskStorage storage;
 
-	private Task(AggregateId id) {
+	private Task(TaskStorage storage, AggregateId id, List<TaskEvent> events) {
 		this.id = id;
 		this.sequence = 0;
-	}
-	
-	public Task(String name) {
-		this(name, Lists.newArrayList());
+		this.name = null;
+		this.assignee = Optional.empty();
+		this.storage = storage;
+		processEvents(events);
 	}
 
-	public Task(String name, List<TaskEvent> events) {
+	private Task(TaskStorage storage, String name) {
 		this.id = new AggregateId.Factory().generate();
 		this.sequence = 0;
 		this.name = name;
 		this.assignee = Optional.empty();
-		processEvents(events);
+		this.storage = storage;
 	}
 
 	private void processEvents(List<TaskEvent> events) {
-		events.stream()
-			.forEach(this::apply);
+		events.stream().forEach(this::apply);
 	}
 
 	@Override
 	public AggregateId getId() {
 		return id;
 	}
-	
+
 	public int getSequence() {
 		return sequence;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -63,8 +78,13 @@ public class Task implements Aggregate {
 			}
 		}
 		TaskAssigned event = new TaskAssigned(id, sequence++, command.getUser());
-		apply(event);
+		applyThenPersist(event);
 		return Optional.of(event);
+	}
+
+	private void applyThenPersist(TaskEvent event) {
+		this.apply(event);
+		this.storage.store(event);
 	}
 
 	private void apply(TaskEvent event) {
@@ -83,7 +103,7 @@ public class Task implements Aggregate {
 			return Optional.empty();
 		}
 		TaskUnassigned event = new TaskUnassigned(id, sequence++);
-		apply(event);
+		applyThenPersist(event);
 		return Optional.of(event);
 	}
 
@@ -93,7 +113,7 @@ public class Task implements Aggregate {
 
 	@Override
 	public String toString() {
-		return "Task [sequence=" + sequence + ", name=" + name + "]";
+		return "Task [id=" + id + ", sequence=" + sequence + ", name=" + name + "]";
 	}
-	
+
 }

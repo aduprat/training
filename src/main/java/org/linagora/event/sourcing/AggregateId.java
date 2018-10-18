@@ -23,7 +23,7 @@ public class AggregateId {
 
 	@Override
 	public String toString() {
-		return "AggregateId [randomUUID=" + randomUUID + "]";
+		return "Id [" + randomUUID + "]";
 	}
 
 }
