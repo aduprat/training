@@ -19,13 +19,15 @@ public class TaskStorage implements Storage<TaskEvent> {
 
 	@Override
 	public void store(TaskEvent event) {
-		List<TaskEvent> list = storage.get(event.getTaskId());
-		if (list == null) {
-			list = Lists.newArrayList();
-			storage.put(event.getTaskId(), list);
+		List<TaskEvent> events = storage.get(event.getTaskId());
+		if (events == null) {
+			events = Lists.newArrayList();
+			storage.put(event.getTaskId(), events);
 		}
-		// TODO Do not store two events with same id !
-		list.add(event);
+		if (events.contains(event)) {
+			throw new RuntimeException("Duplicate event");
+		}
+		events.add(event);
 	}
 
 	@Override
