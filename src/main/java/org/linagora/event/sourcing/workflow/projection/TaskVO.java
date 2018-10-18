@@ -1,13 +1,15 @@
 package org.linagora.event.sourcing.workflow.projection;
 
+import org.linagora.event.sourcing.AggregateId;
+
 public class TaskVO {
 
-	private final int taskId;
+	private final AggregateId taskId;
 	private String name;
 	private int numberOfMovements;
 	private String currentAssignee;
 
-	public TaskVO(int taskId, String name, int numberOfMovements, String currentAssignee) {
+	public TaskVO(AggregateId taskId, String name, int numberOfMovements, String currentAssignee) {
 		this.taskId = taskId;
 		this.name = name;
 		this.numberOfMovements = numberOfMovements;
@@ -38,7 +40,7 @@ public class TaskVO {
 		this.currentAssignee = currentAssignee;
 	}
 
-	public int getTaskId() {
+	public AggregateId getTaskId() {
 		return taskId;
 	}
 
@@ -55,7 +57,7 @@ public class TaskVO {
 		result = prime * result + ((currentAssignee == null) ? 0 : currentAssignee.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + numberOfMovements;
-		result = prime * result + taskId;
+		result = prime * result + ((taskId == null) ? 0 : taskId.hashCode());
 		return result;
 	}
 
@@ -80,7 +82,10 @@ public class TaskVO {
 			return false;
 		if (numberOfMovements != other.numberOfMovements)
 			return false;
-		if (taskId != other.taskId)
+		if (taskId == null) {
+			if (other.taskId != null)
+				return false;
+		} else if (!taskId.equals(other.taskId))
 			return false;
 		return true;
 	}

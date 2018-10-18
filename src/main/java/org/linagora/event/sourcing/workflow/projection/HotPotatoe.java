@@ -3,9 +3,9 @@ package org.linagora.event.sourcing.workflow.projection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.linagora.event.sourcing.AggregateId;
 import org.linagora.event.sourcing.workflow.Event;
 import org.linagora.event.sourcing.workflow.Task;
 import org.linagora.event.sourcing.workflow.TaskAssigned;
@@ -21,8 +21,8 @@ public class HotPotatoe implements Projection {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HotPotatoe.class);
 
-	private Map<Integer, TaskVO> tasks;
-	private Map<Class<? extends TaskEvent>, Integer> lastSequences;
+	private Map<AggregateId, TaskVO> tasks;
+	private Map<AggregateId, Map<Class<? extends TaskEvent>, Integer>> lastSequences;
 
 	public HotPotatoe() {
 		tasks = Maps.newHashMap();
@@ -42,17 +42,18 @@ public class HotPotatoe implements Projection {
 		}
 	}
 
-	private void updateLastSequence(TaskEvent task, Class<? extends TaskEvent> clazz, String assignee) {
-		int taskId = task.taskId();
-		if (notProcessed(taskId, clazz)) {
+	private void updateLastSequence(TaskEvent taskEvent, Class<? extends TaskEvent> clazz, String assignee) {
+		AggregateId taskId = taskEvent.getTaskId();
+		if (notProcessed(taskEvent, clazz)) {
 			TaskVO taskVO = retrieveTaskVOOrCreate(taskId);
 			taskVO.setNumberOfMovements(taskVO.getNumberOfMovements() + 1);
 			taskVO.setCurrentAssignee(assignee);
-			lastSequences.put(clazz, taskId);
+			Map<Class<? extends TaskEvent>, Integer> map = lastSequences.get(taskEvent.getTaskId());
+			map.put(clazz, taskEvent.getId());
 		}
 	}
 
-	private TaskVO retrieveTaskVOOrCreate(int taskId) {
+	private TaskVO retrieveTaskVOOrCreate(AggregateId taskId) {
 		TaskVO task = tasks.get(taskId);
 		if (task == null) {
 			task = new TaskVO(taskId, null, 0, null);
@@ -61,10 +62,23 @@ public class HotPotatoe implements Projection {
 		return task;
 	}
 
-	private boolean notProcessed(int taskId, Class<? extends TaskEvent> clazz) {
-		return Optional.ofNullable(lastSequences.get(clazz))
-			.map(value -> value < taskId)
-			.orElse(true);
+	private boolean notProcessed(TaskEvent taskEvent, Class<? extends TaskEvent> clazz) {
+		Map<Class<? extends TaskEvent>, Integer> map = lastSequences.get(taskEvent.getTaskId());
+		if (map == null) {
+			lastSequences.put(taskEvent.getTaskId(), Maps.newHashMap());
+			return true;
+		}
+		Integer integer = map.get(clazz);
+		if (integer == null) {
+			return true;
+		}
+		if (taskEvent.getId() > integer) {
+			return true;
+		}
+		return false;
+//		return Optional.ofNullable(lastSequences.get(clazz))
+//			.map(value -> value < taskEvent.getId())
+//			.orElse(true);
 	}
 
 	public List<TaskVO> getTasks() {

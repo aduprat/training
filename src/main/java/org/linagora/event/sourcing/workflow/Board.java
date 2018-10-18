@@ -1,32 +1,31 @@
 package org.linagora.event.sourcing.workflow;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.linagora.event.sourcing.Aggregate;
+import org.linagora.event.sourcing.AggregateId;
 
 public class Board implements Aggregate {
 
-	private final UUID id;
+	private final AggregateId id;
 	private String name;
 	
-	private int sequence = 0;
-	
 	public Board(String name) {
-		this.id = UUID.randomUUID();
+		this.id = new AggregateId.Factory().generate();
 		this.name = name;
 	}
 
-	public UUID getId() {
+	@Override
+	public AggregateId getId() {
 		return id;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
 
 	public Optional<TaskCreated> createTask(CreateCommand command) {
-		TaskCreated event = new TaskCreated(new Task(sequence++, command.getName()));
+		TaskCreated event = new TaskCreated(new Task(command.getName()));
 		apply(event);
 		return Optional.of(event);
 	}

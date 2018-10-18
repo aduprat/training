@@ -4,29 +4,52 @@ import java.util.List;
 import java.util.Optional;
 
 import org.linagora.event.sourcing.Aggregate;
+import org.linagora.event.sourcing.AggregateId;
 
 import com.google.common.collect.Lists;
 
 public class Task implements Aggregate {
 
-	private final int id;
+	public static Task withEvents(AggregateId id, List<TaskEvent> events) {
+		Task task = new Task(id);
+		task.processEvents(events);
+		return task;
+	}
+	
+	private final AggregateId id;
+	private int sequence;
 	private String name;
 	private Optional<User> assignee;
 
-	public Task(int id, String name) {
-		this(id, name, Lists.newArrayList());
+	private Task(AggregateId id) {
+		this.id = id;
+		this.sequence = 0;
+	}
+	
+	public Task(String name) {
+		this(name, Lists.newArrayList());
 	}
 
-	public Task(int id, String name, List<TaskEvent> events) {
-		this.id = id;
+	public Task(String name, List<TaskEvent> events) {
+		this.id = new AggregateId.Factory().generate();
+		this.sequence = 0;
 		this.name = name;
 		this.assignee = Optional.empty();
+		processEvents(events);
+	}
+
+	private void processEvents(List<TaskEvent> events) {
 		events.stream()
 			.forEach(this::apply);
 	}
 
-	public int getId() {
+	@Override
+	public AggregateId getId() {
 		return id;
+	}
+	
+	public int getSequence() {
+		return sequence;
 	}
 	
 	public String getName() {
@@ -39,7 +62,7 @@ public class Task implements Aggregate {
 				return Optional.empty();
 			}
 		}
-		TaskAssigned event = new TaskAssigned(id, command.getUser());
+		TaskAssigned event = new TaskAssigned(id, sequence++, command.getUser());
 		apply(event);
 		return Optional.of(event);
 	}
@@ -52,13 +75,14 @@ public class Task implements Aggregate {
 		} else if (event instanceof TaskCreated) {
 			name = ((TaskCreated) event).task().getName();
 		}
+		this.sequence = event.getId();
 	}
 
 	public Optional<TaskUnassigned> unassign(UnassignCommand command) {
 		if (!this.assignee.isPresent()) {
 			return Optional.empty();
 		}
-		TaskUnassigned event = new TaskUnassigned(id);
+		TaskUnassigned event = new TaskUnassigned(id, sequence++);
 		apply(event);
 		return Optional.of(event);
 	}
@@ -69,7 +93,7 @@ public class Task implements Aggregate {
 
 	@Override
 	public String toString() {
-		return "Task [id=" + id + ", name=" + name + "]";
+		return "Task [sequence=" + sequence + ", name=" + name + "]";
 	}
 	
 }

@@ -2,14 +2,23 @@ package org.linagora.event.sourcing.workflow;
 
 import java.util.Date;
 
+import org.linagora.event.sourcing.AggregateId;
+
 public class TaskUnassigned implements TaskEvent {
 
-	private final int taskId;
+	private final AggregateId taskId;
+	private final int id;
 	private final Date eventDate;
 
-	public TaskUnassigned(int taskId) {
+	public TaskUnassigned(AggregateId taskId, int id) {
 		this.taskId = taskId;
+		this.id = id;
 		this.eventDate = new Date();
+	}
+
+	@Override
+	public AggregateId getTaskId() {
+		return taskId;
 	}
 
 	public Date getEventDate() {
@@ -17,12 +26,12 @@ public class TaskUnassigned implements TaskEvent {
 	}
 
 	@Override
-	public int taskId() {
-		return taskId;
+	public int getId() {
+		return id;
 	}
 
 	@Override
 	public String toString() {
-		return "TaskUnassigned [taskId=" + taskId + ", eventDate=" + eventDate + "]";
+		return "TaskUnassigned [taskId=" + taskId + ", id=" + id + ", eventDate=" + eventDate + "]";
 	}
 }
